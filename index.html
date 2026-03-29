@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SHIFT AI ゆるっと作業会 in 広島</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+:root {
+  --pur: #7C3AED;
+  --pink: #EC4899;
+  --grad: linear-gradient(90deg, #7C3AED 0%, #C026A0 50%, #EC4899 100%);
+  --grad-diag: linear-gradient(135deg, #7C3AED 0%, #C026A0 50%, #EC4899 100%);
+  --tbl-head: #B0148E;
+  --tbl-col: #9A1280;
+  --tbl-row: #FDF0FA;
+  --tbl-row2: #FAE8F6;
+  --bg: #F7F7F7;
+  --white: #FFFFFF;
+  --text: #1A1A2E;
+  --text-m: #555577;
+  --bd: rgba(176,20,142,0.15);
+  --card-bg: #FFFFFF;
+  --shadow: 0 2px 16px rgba(124,58,237,0.1);
+  --r: 10px;
+  --rs: 6px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:'Noto Sans JP','Inter',sans-serif;color:var(--text);}
+
+/* ─── SLIDE ENGINE ─── */
+.deck{width:100%;height:100%;position:relative;}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .3s ease;background:var(--bg);}
+.slide.on{opacity:1;pointer-events:all;}
+
+/* ─── HEADER BAR ─── */
+.s-header{
+  background:var(--grad);
+  height:72px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 36px;
+  flex-shrink:0;
+  position:relative;
+}
+.s-header::after{
+  content:'';
+  position:absolute;
+  bottom:0;left:0;right:0;
+  height:2px;
+  background:rgba(255,255,255,0.2);
+}
+.s-htitle{
+  font-size:clamp(1rem,2.2vw,1.5rem);
+  font-weight:900;
+  color:#fff;
+  letter-spacing:.5px;
+  word-break:keep-all;
+}
+.s-logo{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:1px;
+}
+.s-logo-name{
+  font-size:1.2rem;
+  font-weight:900;
+  color:#fff;
+  letter-spacing:2px;
+  font-family:'Inter',sans-serif;
+}
+.s-logo-sub{
+  font-size:.62rem;
+  color:rgba(255,255,255,.8);
+  letter-spacing:1px;
+  font-style:italic;
+}
+
+/* ─── BACKGROUND WATERMARK ─── */
+.slide::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background-image:
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 28px,
+      rgba(180,30,160,.025) 28px,
+      rgba(180,30,160,.025) 29px
+    );
+  z-index:0;
+}
+.s-header{z-index:2;}
+.s-body{position:relative;z-index:1;}
+
+/* ─── BODY AREA ─── */
+.s-body{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  padding:28px 56px 28px;
+  text-align:center;
+  overflow:hidden;
+}
+.s-body.left{align-items:flex-start;text-align:left;}
+.s-body.wide{padding:24px 40px 20px;}
+.s-body.top{justify-content:flex-start;padding-top:28px;}
+
+/* ─── TYPOGRAPHY ─── */
+h1{font-size:clamp(1.8rem,4vw,3.2rem);font-weight:900;line-height:1.2;word-break:keep-all;margin-bottom:16px;color:var(--text);}
+h2{font-size:clamp(1.3rem,2.8vw,2.1rem);font-weight:700;line-height:1.25;word-break:keep-all;margin-bottom:14px;color:var(--text);}
+h3{font-size:clamp(1rem,1.8vw,1.25rem);font-weight:600;margin-bottom:8px;word-break:keep-all;}
+p.sub{font-size:clamp(.88rem,1.4vw,1.05rem);line-height:1.8;color:var(--text-m);max-width:700px;}
+.hl{color:var(--pur);}
+.hlp{color:var(--pink);}
+.grd{background:var(--grad-diag);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+
+/* ─── CONTROLS ─── */
+.progress{position:fixed;bottom:0;left:0;height:3px;background:var(--grad);transition:width .3s;z-index:200;}
+.counter{position:fixed;bottom:10px;right:14px;font-size:11px;color:var(--text-m);z-index:200;letter-spacing:.5px;}
+.nav{position:fixed;top:50%;transform:translateY(-50%);background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.2);color:var(--text-m);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:200;transition:all .2s;opacity:.5;}
+.nav:hover{opacity:1;background:rgba(124,58,237,.2);}
+.nav-l{left:10px;}.nav-r{right:10px;}
+.fsbtn{position:fixed;top:80px;right:12px;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.2);color:var(--text-m);border-radius:7px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:200;}
+.fsbtn:hover{background:rgba(124,58,237,.25);}
+.fsbtn .material-icons{font-size:16px;}
+
+/* ─── SECTION BADGE ─── */
+
+/* ─── CARD ─── */
+.card{background:var(--card-bg);border:1px solid var(--bd);border-radius:var(--r);padding:20px;box-shadow:var(--shadow);}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+
+/* ─── TABLE (SHIFT AI style) ─── */
+.tbl-wrap{background:#fff;border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);width:100%;border:1px solid rgba(176,20,142,.1);}
+table{width:100%;border-collapse:collapse;}
+thead tr th, table > tr:first-child td{background:var(--tbl-head);color:#fff;font-weight:700;padding:12px 16px;text-align:center;font-size:.83rem;letter-spacing:.3px;}
+tbody tr td:first-child{background:var(--tbl-col);color:#fff;font-weight:700;text-align:center;padding:12px 14px;font-size:.82rem;}
+tbody tr td{background:var(--tbl-row);padding:11px 14px;text-align:center;font-size:.82rem;line-height:1.5;border-bottom:1px solid rgba(176,20,142,.08);}
+tbody tr:nth-child(even) td{background:var(--tbl-row2);}
+tbody tr:nth-child(even) td:first-child{background:var(--tbl-col);}
+tbody tr:last-child td{border-bottom:none;}
+.tc-l{text-align:left!important;}
+
+/* ─── TOOL LAYOUT ─── */
+.tool-wrap{display:grid;grid-template-columns:200px 1fr;gap:20px;width:100%;max-width:920px;align-items:start;}
+.tool-left{background:#fff;border:1px solid var(--bd);border-radius:var(--r);padding:24px 18px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;box-shadow:var(--shadow);}
+.tool-icon{width:56px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center;}
+.tool-icon .material-icons{font-size:30px;}
+.tool-name{font-size:1.2rem;font-weight:800;color:var(--text);}
+.tool-maker{font-size:.72rem;color:var(--text-m);}
+.tool-tagline{font-size:.78rem;line-height:1.5;color:var(--text);margin-top:6px;padding-top:8px;border-top:1px solid var(--bd);}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.info-card{background:#fff;border-radius:var(--rs);padding:14px;box-shadow:var(--shadow);border:1px solid var(--bd);}
+.info-label{font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:7px;}
+.lbl-feat{color:var(--pur);}
+.lbl-str{color:#059669;}
+.lbl-wk{color:#DC2626;}
+.lbl-use{color:#0891B2;}
+.info-card ul{list-style:none;padding:0;}
+.info-card li{font-size:.78rem;line-height:1.55;color:var(--text);padding-left:10px;position:relative;margin-bottom:2px;}
+.info-card li::before{content:'';position:absolute;left:0;top:8px;width:4px;height:4px;border-radius:50%;background:var(--text-m);}
+
+/* ─── PILL TAGS ─── */
+.pill{display:inline-block;padding:2px 10px;border-radius:20px;font-size:.7rem;font-weight:600;letter-spacing:.3px;}
+.pill-b{background:#EEF2FF;color:#4338CA;border:1px solid #C7D2FE;}
+.pill-g{background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;}
+.pill-r{background:#FEF2F2;color:#991B1B;border:1px solid #FECACA;}
+.pill-p{background:#FDF4FF;color:#7E22CE;border:1px solid #E9D5FF;}
+.pill-o{background:#FFF7ED;color:#9A3412;border:1px solid #FED7AA;}
+
+/* ─── CHIP ROW ─── */
+.chips{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:6px;}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:20px;font-size:.75rem;font-weight:500;background:#fff;border:1px solid var(--bd);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.06);}
+
+/* ─── MAP COLS ─── */
+.map-cols{display:flex;gap:14px;width:100%;max-width:920px;}
+.map-col{flex:1;background:#fff;border:1px solid var(--bd);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);}
+.map-col-title{font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;padding-bottom:9px;border-bottom:1px solid var(--bd);}
+.map-item{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid rgba(176,20,142,.06);}
+.map-item:last-child{border-bottom:none;}
+.map-item .material-icons{font-size:16px;}
+.mi-name{font-size:.8rem;font-weight:600;color:var(--text);}
+.mi-desc{font-size:.7rem;color:var(--text-m);}
+
+/* ─── COMBO FLOW ─── */
+.combo{display:flex;flex-direction:column;gap:10px;width:100%;max-width:640px;}
+.combo-row{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--bd);border-radius:var(--rs);padding:12px 16px;box-shadow:var(--shadow);}
+.combo-row .material-icons{color:var(--text-m);font-size:17px;flex-shrink:0;}
+.cr-tool{font-size:.73rem;font-weight:700;color:var(--pur);min-width:90px;}
+.cr-desc{font-size:.8rem;color:var(--text);}
+
+/* ─── STEP BOX ─── */
+.step-box{display:flex;align-items:flex-start;gap:14px;background:#fff;border:1px solid var(--bd);border-radius:var(--r);padding:16px 20px;box-shadow:var(--shadow);margin-bottom:10px;}
+.step-num{min-width:26px;height:26px;border-radius:50%;background:var(--grad-diag);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;margin-top:2px;}
+
+/* ─── SCENE WRAP ─── */
+.scene-wrap{display:grid;grid-template-columns:1fr 1fr;gap:16px;width:100%;max-width:840px;}
+.scene-card{background:#fff;border:1px solid var(--bd);border-radius:var(--r);padding:20px;text-align:left;box-shadow:var(--shadow);}
+
+/* ─── HANDSON BOX ─── */
+.hs-box{background:#fff;border:2px solid var(--pur);border-radius:var(--r);padding:28px 36px;max-width:640px;text-align:center;box-shadow:var(--shadow);}
+
+/* ─── CHECK LIST ─── */
+.chk{list-style:none;padding:0;max-width:600px;width:100%;text-align:left;}
+.chk li{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(176,20,142,.08);font-size:.9rem;color:var(--text);}
+.chk li .material-icons{color:#059669;font-size:18px;flex-shrink:0;}
+
+/* ─── ACCENT BLOCK ─── */
+.accent-block{background:linear-gradient(135deg,#F5F0FF,#FDF0FA);border:1px solid rgba(124,58,237,.2);border-radius:var(--r);padding:14px 20px;font-size:.82rem;}
+.info-block{background:#F0FDF4;border:1px solid #BBF7D0;border-radius:var(--r);padding:14px 20px;font-size:.82rem;}
+.warn-block{background:#FFF7ED;border:1px solid #FED7AA;border-radius:var(--r);padding:14px 20px;font-size:.82rem;}
+
+/* ─── TITLE SLIDE SPECIAL ─── */
+.title-slide .s-body{
+  background:linear-gradient(135deg,#F5F0FF 0%,#FDF4FF 50%,#FFF0F9 100%);
+}
+.title-slide::before{display:none;}
+
+/* ─── WIDE TABLE ─── */
+.qtable{width:100%;border-collapse:collapse;background:#fff;border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);}
+.qtable thead th{background:var(--tbl-head);color:#fff;padding:10px 14px;text-align:left;font-weight:700;font-size:.8rem;}
+.qtable tbody td{padding:10px 14px;font-size:.82rem;border-bottom:1px solid rgba(176,20,142,.07);}
+.qtable tbody tr:nth-child(odd) td{background:var(--tbl-row);}
+.qtable tbody tr:nth-child(even) td{background:var(--tbl-row2);}
+.qtable tbody tr:last-child td{border-bottom:none;}
+.qtable .tool-col{font-weight:700;color:var(--tbl-col);}
+
+/* ─── CLOSING SPECIAL ─── */
+.closing-slide .s-body{
+  background:linear-gradient(135deg,#F5F0FF,#FDF0FA);
+}
+.closing-slide::before{display:none;}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+<!-- ==================== 1: TITLE ==================== -->
+<div class="slide on title-slide" id="s1">
+  <div class="s-header">
+    <div class="s-htitle">SHIFT AI ゆるっと作業会 in 広島</div>
+    <div class="s-logo"><span class="s-logo-name">SHIFT AI</span><span class="s-logo-sub">Shift to AI era.</span></div>
+  </div>
+  <div class="s-body">
+    <div style="font-size:.8rem;color:#888;margin-bottom:14px;letter-spacing:.5px;">2026.3.29 広島</div>
+    <h1 class="grd" style="font-size:clamp(2rem,5vw,3.5rem);margin-bottom:12px;">いろんなLLM・AIツールを<br>みんなで触ってみよう</h1>
+    <p class="sub" style="margin-bottom:28px;">9つのAIツールを体験して「どれを使えばいいか」がわかるようになります</p>
+    <div class="chips">
+      <span class="chip"><span class="material-icons" style="font-size:13px;color:#10A37F;">chat</span>ChatGPT</span>
+      <span class="chip"><span class="material-icons" style="font-size:13px;color:#4285F4;">auto_awesome</span>Gemini</span>
+      <span class="chip"><span class="material-icons" style="font-size:13px;color:#D29D6B;">psychology</span>Claude</span>
+      <span class="chip"><span class="material-icons" style="font-size:13px;color:#F59E0B;">rocket_launch</span>Genspark</span>
+      <span class="chip"><span class="material-icons" style="font-size:13px;color:#EF4444;">smart_toy</span>Manus</span>
+      <span class="chip"><span class="material-icons" style="font-size:13px;color:#0EA5E9;">search</span>Felo</span>
+      <span class="chip"><span class="material-icons" style="font-size:13px;color:#EC4899;">mic</span>AquaVoice</span>
+      <span class="chip"><span class="material-icons" style="font-size:13px;color:#F59E0B;">videocam</span>tl;dv</span>
+      <span class="chip"><span class="material-icons" style="font-size:13px;color:#7C3AED;">code</span>Claude Code</span>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 2: WHY-1 ==================== -->
+<div class="slide" id="s2">
+  <div class="s-header">
+    <div class="s-htitle">AIって結局どれを使えばいいの？</div>
+    <div class="s-logo"><span class="s-logo-name">SHIFT AI</span><span class="s-logo-sub">Shift to AI era.</span></div>
+  </div>
+  <div class="s-body">
+    <h2 style="margin-bottom:20px;">「AIって結局<span class="hlp">どれを使えばいいの？</span>」</h2>
+    <div class="g3" style="width:100%;max-width:800px;margin-bottom:20px;">
+      <div class="card" style="text-align:left;">
+        <span class="material-icons" style="color:#EF4444;margin-bottom:10px;font-size:1.5rem;">help_outline</span>
+        <div style="font-weight:700;margin-bottom:6px;font-size:.88rem;">ChatGPT vs Claude<br>何が違うの？</div>
+        <div style="font-size:.75rem;color:var(--text-m);">どちらも「AIチャット」でしょ？</div>
+      </div>
+      <div class="card" style="text-align:left;">
+        <span class="material-icons" style="color:#F59E0B;margin-bottom:10px;font-size:1.5rem;">help_outline</span>
+        <div style="font-weight:700;margin-bottom:6px;font-size:.88rem;">Genspark・Manus・Felo<br>聞いたことない…</div>
+        <div style="font-size:.75rem;color:var(--text-m);">また新しいツールが出てきた</div>
+      </div>
+      <div class="card" style="text-align:left;">
+        <span class="material-icons" style="color:var(--pur);margin-bottom:10px;font-size:1.5rem;">help_outline</span>
+        <div style="font-weight:700;margin-bottom:6px;font-size:.88rem;">無料？有料？<br>どこから始めれば？</div>
+        <div style="font-size:.75rem;color:var(--text-m);">調べれば調べるほど迷う</div>
+      </div>
+    </div>
+    <div class="accent-block" style="max-width:620px;width:100%;">
+      <span class="material-icons" style="font-size:14px;vertical-align:middle;color:var(--pur);margin-right:6px;">lightbulb</span>
+      これは誰もが感じる疑問。今日はその「迷い」を一緒に解消しましょう。
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 3: WHY-2 ==================== -->
+<div class="slide" id="s3">
+  <div class="s-header">
+    <div class="s-htitle">種類が多すぎて迷う、は当然</div>
+    <div class="s-logo"><span class="s-logo-name">SHIFT AI</span><span class="s-logo-sub">Shift to AI era.</span></div>
+  </div>
+  <div class="s-body">
+    <h2 style="margin-bottom:6px;">種類が多すぎて迷う、は<span class="hlp">当然</span></h2>
+    <p class="sub" style="margin-bottom:20px;">毎週のように新しいAIツールが登場しています</p>
+    <div class="card" style="max-width:640px;width:100%;text-align:left;margin-bottom:16px;">
+      <div style="font-size:.72rem;color:var(--text-m);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;border-bottom:1px solid var(--bd);padding-bottom:10px;">AIツールの増加スピード</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:center;gap:12px;font-size:.82rem;">
+          <span style="min-width:68px;color:var(--text-m);">2022年</span>
+          <div style="height:8px;background:linear-gradient(90deg,#C026A0,#EC4899);border-radius:4px;width:28%;opacity:.5;"></div>
+          <span style="color:var(--text-m);">ChatGPT登場</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;font-size:.82rem;">
+          <span style="min-width:68px;color:var(--text-m);">2023年</span>
+          <div style="height:8px;background:linear-gradient(90deg,#C026A0,#EC4899);border-radius:4px;width:50%;opacity:.65;"></div>
+          <span style="color:var(--text-m);">Gemini / Claude登場</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;font-size:.82rem;">
+          <span style="min-width:68px;color:var(--text-m);">2024年</span>
+          <div style="height:8px;background:linear-gradient(90deg,#C026A0,#EC4899);border-radius:4px;width:72%;opacity:.8;"></div>
+          <span style="color:var(--text-m);">エージェントAIが続々</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;font-size:.82rem;">
+          <span style="min-width:68px;color:var(--pink);font-weight:700;">2025年〜</span>
+          <div style="height:8px;background:var(--grad);border-radius:4px;width:95%;"></div>
+          <span style="color:var(--pink);font-weight:700;">毎週新ツール</span>
+        </div>
+      </div>
+    </div>
+    <div class="info-block" style="max-width:580px;width:100%;">
+      <span class="material-icons" style="font-size:14px;vertical-align:middle;color:#059669;margin-right:6px;">check_circle</span>
+      <strong>今日の目的：</strong> 全部知らなくていい。「自分の仕事に使えるか」を実際に触って感覚をつかもう
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 4: WHY-3 ツールマップ ==================== -->
+<div class="slide" id="s4">
+  <div class="s-header">
+    <div class="s-htitle">今日紹介する9つのツール</div>
+    <div class="s-logo"><span class="s-logo-name">SHIFT AI</span><span class="s-logo-sub">Shift to AI era.</span></div>
+  </div>
+  <div class="s-body wide">
+    <h2 style="margin-bottom:16px;">3カテゴリに分けて理解しよう</h2>
+    <div class="map-cols">
+      <div class="map-col">
+        <div class="map-col-title" style="color:var(--pur);">LLM（会話AI）</div>
+        <div class="map-item"><span class="material-icons" style="color:#10A37F;">chat</span><div><div class="mi-name">ChatGPT</div><div class="mi-desc">OpenAI / 汎用・定番</div></div></div>
+        <div class="map-item"><span class="material-icons" style="color:#4285F4;">auto_awesome</span><div><div class="mi-name">Gemini</div><div class="mi-desc">Google / Google連携</div></div></div>
+        <div class="map-item"><span class="material-icons" style="color:#D29D6B;">psychology</span><div><div class="mi-name">Claude</div><div class="mi-desc">Anthropic / 長文・正確さ</div></div></div>
+      </div>
+      <div class="map-col">
+        <div class="map-col-title" style="color:#EA580C;">エージェントAI（自律AI）</div>
+        <div class="map-item"><span class="material-icons" style="color:#F59E0B;">rocket_launch</span><div><div class="mi-name">Genspark</div><div class="mi-desc">調査・資料化 一気通貫</div></div></div>
+        <div class="map-item"><span class="material-icons" style="color:#EF4444;">smart_toy</span><div><div class="mi-name">Manus</div><div class="mi-desc">自律タスク実行・操作代行</div></div></div>
+        <div class="map-item"><span class="material-icons" style="color:#0EA5E9;">search</span><div><div class="mi-name">Felo</div><div class="mi-desc">日本語特化リサーチ</div></div></div>
+      </div>
+      <div class="map-col">
+        <div class="map-col-title" style="color:#059669;">専門ツール</div>
+        <div class="map-item"><span class="material-icons" style="color:#EC4899;">mic</span><div><div class="mi-name">AquaVoice</div><div class="mi-desc">音声→テキスト変換AI</div></div></div>
+        <div class="map-item"><span class="material-icons" style="color:#F59E0B;">videocam</span><div><div class="mi-name">tl;dv</div><div class="mi-desc">会議録画・要約AI</div></div></div>
+        <div class="map-item"><span class="material-icons" style="color:#7C3AED;">code</span><div><div class="mi-name">Claude Code</div><div class="mi-desc">AIとペアでコーディング</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 5: LLMとは ==================== -->
+<div class="slide" id="s5">
+  <div class="s-header">
+    <div class="s-htitle">LLM（大規模言語モデル）とは？</div>
+    <div class="s-logo"><span class="s-logo-name">SHIFT AI</span><span class="s-logo-sub">Shift to AI era.</span></div>
+  </div>
+  <div class="s-body">
+    <h2>テキストで会話するAI</h2>
+    <p class="sub" style="margin-bottom:24px;">質問すれば答えてくれる、今もっとも身近なAIのかたちです</p>
+    <div class="g3" style="width:100%;max-width:780px;">
+      <div class="card" style="text-align:left;">
+        <span class="material-icons" style="color:var(--pur);margin-bottom:10px;font-size:1.6rem;">question_answer</span>
+        <div style="font-weight:700;margin-bottom:6px;">会話形式で使える</div>
+        <div style="font-size:.78rem;color:var(--text-m);line-height:1.6;">「○○について教えて」と話しかけるだけ。プログラミング不要。</div>
+      </div>
+      <div class="card" style="text-align:left;">
+        <span class="material-icons" style="color:#059669;margin-bottom:10px;font-size:1.6rem;">description</span>
+        <div style="font-weight:700;margin-bottom:6px;">文章・アイデアを生成</div>
+        <div style="font-size:.78rem;color:var(--text-m);line-height:1.6;">メール・企画書・要約・翻訳・コードまで幅広く対応。</div>
+      </div>
+      <div class="card" style="text-align:left;">
+        <span class="material-icons" style="color:#EA580C;margin-bottom:10px;font-size:1.6rem;">psychology</span>
+        <div style="font-weight:700;margin-bottom:6px;">壁打ち・思考整理</div>
+        <div style="font-size:.78rem;color:var(--text-m);line-height:1.6;">アイデアを壁打ちしたり、考えを整理する相棒として使える。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 6: ChatGPT ==================== -->
+<div class="slide" id="s6">
+  <div class="s-header">
+    <div class="s-htitle">ChatGPT</div>
+    <div class="s-logo"><span class="s-logo-name">SHIFT AI</span><span class="s-logo-sub">Shift to AI era.</span></div>
+  </div>
+  <div class="s-body wide">
+    <div class="tool-wrap">
+      <div class="tool-left">
+        <div class="tool-icon" style="background:#E6F9F5;"><span class="material-icons" style="color:#10A37F;">chat</span></div>
+        <div class="tool-name">ChatGPT</div>
+        <div class="tool-maker">OpenAI</div>
+        <div class="tool-tagline">なんでも相談できる<br>AIの「定番」入口</div>
+        <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:5px;justify-content:center;">
+          <span class="pill pill-g">無料プランあり</span>
+          <span class="pill pill-b">プラグイン豊富</span>
+        </div>
+      </div>
+      <div class="info-grid">
+        <div class="info-card"><div class="info-label lbl-feat">特徴</div><ul><li>最も利用者が多い定番LLM</li><li>GPT-4oで画像・音声にも対応</li><li>プラグイン・カスタムGPT機能</li></ul></div>
+        <div class="info-card"><div class="info-label lbl-str">強み</div><ul><li>何でも気軽に聞ける汎用性</li><li>情報量・回答の幅が広い</li><li>ユーザーコミュニティが巨大</li></ul></div>
+        <div class="info-card"><div class="info-label lbl-wk">弱み</div><ul><li>まれに自信満々で間違える</li><li>長文の正確な読み込みはやや苦手</li><li>高機能版は有料（月$20〜）</li></ul></div>
+        <div class="info-card"><div class="info-label lbl-use">使う場面</div><ul><li>アイデア出し・壁打ち</li><li>メール・文章の下書き</li><li>「まず相談したい」ときの入口</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 7: Gemini ==================== -->
+<div class="slide" id="s7">
+  <div class="s-header">
+    <div class="s-htitle">Gemini</div>
+    <div class="s-logo"><span class="s-logo-name">SHIFT AI</span><span class="s-logo-sub">Shift to AI era.</span></div>
+  </div>
+  <div class="s-body wide">
+    <div class="tool-wrap">
+      <div class="tool-left">
+        <div class="tool-icon" style="background:#E8F0FE;"><span class="material-icons" style="color:#4285F4;">auto_awesome</span></div>
+        <div class="tool-name">Gemini</div>
+        <div class="tool-maker">Google</div>
+        <div class="tool-tagline">Googleと連携する<br>マルチモーダルAI</div>
+        <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:5px;justify-content:center;">
+          <span class="pill pill-g">無料プランあり</span>
+          <span class="pill pill-b">Google連携</span>
+        </div>
+      </div>
+      <div class="info-grid">
+        <div class="info-card"><div class="info-label lbl-feat">特徴</div><ul><li>Google製・Googleサービスと統合</li><li>画像・音声・動画も処理可能</li><li>GmailやドライブとAIが連動</li></ul></div>
+        <div class="info-card"><div class="info-label lbl-str">強み</div><ul><li>Google Workspace連携が強力</li><li>リアルタイム検索で最新情報に強い</li><li>マルチモーダル（画像読み込みなど）</li></ul></div>
+        <div class="info-card"><div class="info-label lbl-wk">弱み</div><ul><li>日本語の自然な表現がやや不安定</li><li>ChatGPTに比べて使い勝手に慣れが必要</li><li>精度にムラがある場面も</li></ul></div>
+        <div class="info-card"><div class="info-label lbl-use">使う場面</div><ul><li>Google DriveのPDF・資料を要約</li><li>Gmailの下書き自動生成</li><li>最新情報のリサーチ</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 8: Claude ==================== -->
+<div class="slide" id="s8">
+  <div class="s-header">
+    <div class="s-htitle">Claude</div>
+    <div class="s-logo"><span class="s-logo-name">SHIFT AI</span><span class="s-logo-sub">Shift to AI era.</span></div>
+  </div>
+  <div class="s-body wide">
+    <div class="tool-wrap">
+      <div class="tool-left">
+        <div class="tool-icon" style="background:#FEF3E8;"><span class="material-icons" style="color:#D29D6B;">psychology</span></div>
+        <div class="tool-name">Claude</div>
+        <div class="tool-maker">Anthropic</div>
+        <div class="tool-tagline">長文・正確さ重視の<br>高品質AIアシスタント</div>
+        <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:5px;justify-content:center;">
+          <span class="pill pill-g">無料プランあり</span>
+          <span class="pill pill-p">長文得意</span>
+        </div>
+      </div>
+      <div class="info-grid">
+        <div class="info-card"><div class="info-label lbl-feat">特徴</div><ul><li>安全性・誠実さを重視して設計</li><li>200,000トークンの超長文処理</li><li>Anthropic社（元OpenAI創業者ら）製</li></ul></div>
+        <div class="info-card"><div class="info-label lbl-str">強み</div><ul><li>長い文書の読み込み・要約が秀逸</li><li>文章の質・自然さが高い</li><li>指示への忠実さ・一貫性が高い</li></ul></div>
+        <div class="info-card"><div class="info-label lbl-wk">弱み</div><ul><li>インターネット検索は不得意</li><li>画像生成は非対応</li><li>プラグインエコシステムが少ない</li></ul></div>
+        <div class="info-card"><div class="info-label lbl-use">使う場面</div><ul><li>契約書・報告書などの長文読解</li><li>高品質な文章作成・編集</li><li>コードのレビュー・デバッグ</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 9: LLM比較表 ==================== -->
+<div class="slide" id="s9">
+  <div class="s-header">
+    <div class="s-htitle">LLM 3強 比較表</div>
+    <div class="s-logo"><span class="s-logo-name">SHIFT AI</span><span class="s-logo-sub">Shift to AI era.</span></div>
+  </div>
+  <div class="s-body wide">
+    <h2 style="margin-bottom:18px;">LLM 3強 <span class="hl">比較表</span></h2>
+    <div class="tbl-wrap" style="max-width:900px;">
+      <table>
+        <thead><tr><th>ツール</th><th>作った会社</th><th>最大の強み</th><th>弱点</th><th>まずこれで試して</th></tr></thead>
+        <tbody>
+          <tr><td>ChatGPT</td><td>OpenAI</td><td>汎用性・何でも相談できる</td><td>まれに誤情報を自信満々で出す</td><td>アイデア出し・壁打ち</td></tr>
+          <tr><td>Gemini</td><td>Google</td><td>Google Workspace連携・最新情報</td><td>日本語の自然さにムラあり</td><td>Gmailの返信文を自動生成</td></tr>
+          <tr><td>Claude</td><td>Anthropic</td><td>長文処理・文章品質・正確さ</td><td>ネット検索・画像生成は非対応</td><td>長い資料を貼り付けて要約</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="accent-block" style="margin-top:16px;max-width:700px;width:100%;">
+      <span class="material-icons" style="font-size:14px;vertical-align:middle;color:var(--pur);margin-right:5px;">tips_and_updates</span>
+      <strong>迷ったら？</strong> まずChatGPTで相談 → 長文・品質重視ならClaude → Google連携ならGemini
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 10: エージェントAIとは ==================== -->
+<div class="slide" id="s10">
+  <div class="s-header">
+    <div class="s-htitle">エージェントAIとは？</div>
+    <div class="s-logo"><span class="s-logo-name">SHIFT AI</span><span class="s-logo-sub">Shift to AI era.</span></div>
+  </div>
+  <div class="s-body">
+    <h2>「指示に答えるだけ」を超えたAI</h2>
+    <p class="sub" style="margin-bottom:22px;"><strong>自分で考えて、調べて、行動まで完結</strong>させるのがエージェントAIです</p>
+    <div class="g2" style="width:100%;max-width:720px;margin-bottom:16px;">
+      <div class="card" style="text-align:left;">
+        <div style="font-size:.72rem;color:var(--text-m);letter-spacing:1px;text-transform:uppercase;font-weight:700;margin-bottom:10px;">LLM（ChatGPT等）</div>
+        <div style="font-size:.85rem;line-height:1.8;">質問する → 答えてくれる<br><span style="color:var(--text-m);">→ あなたが次の行動をする</span></div>
+      </div>
+      <div class="card" style="text-align:left;border-color:rgba(234,88,12,.3);">
+        <div style="font-size:.72rem;color:#EA580C;letter-spacing:1px;text-transform:uppercase;font-weight:700;margin-bottom:10px;">エージェントAI</div>
+        <div style="font-size:.85rem;line-height:1.8;">目標を伝える → <strong>自分で計画・調査・実行</strong><br><span style="color:#059669;">→ 結果だけ受け取る</span></div>
+      </div>
+    </div>
+    <div class="warn-block" style="max-width:580px;width:100%;font-size:.82rem;">
+      <span class="material-icons" style="font-size:14px;vertical-align:middle;color:#EA580C;margin-right:5px;">tips_and_updates</span>「調べておいて」「まとめておいて」を任せられるのがエージェントAI
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 11: Genspark ==================== -->
+<div class="slide" id="s11">
+  <div class="s-header">
+    <div class="s-htitle">Genspark</div>
+    <div class="s-logo"><span class="s-logo-name">SHIFT AI</span><span class="s-logo-sub">Shift to AI era.</span></div>
+  </div>
+  <div class="s-body wide">
+    <div class="tool-wrap">
+      <div class="tool-left">
+        <div class="tool-icon" style="background:#FEF3C7;"><span class="material-icons" style="color:#F59E0B;">rocket_launch</span></div>
+        <div class="tool-name">Genspark</div>
+        <div class="tool-maker">Genspark AI</div>
+        <div class="tool-tagline">調査から資料化まで<br>一気通貫で完成させる</div>
+        <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:5px;justify-content:center;">
+          <span class="pill pill-g">無料プランあり</span>
+          <span class="pill pill-o">Spark Page</span>
+        </div>
+      </div>
+      <div class="info-grid">
+        <div class="info-card"><div class="info-label lbl-feat">特徴</div><ul><li>テーマを入れると調査→資料を自動生成</li><li>Spark Pageという美しい資料形式で出力</li><li>複数エージェントが分担して動く</li></ul></div>
+        <div class="info-card"><div class="info-label lbl-str">強み</div><ul><li>「調べてまとめて」を一発でやってくれる</li><li>アウトプットの見た目が美しい</li><li>市場調査・競合分析に向く</li></ul></div>
+        <div class="info-card"><div class="info-label lbl-wk">弱み</div><ul><li>情報の正確性にムラがある</li><li>深い専門知識の調査は苦手</li><li>日本語ソース収集の精度は要確認</li></ul></div>
+        <div class="info-card"><div class="info-label lbl-use">使う場面</div><ul><li>競合・市場調査のたたき台作成</li><li>勉強会・発表のスライド下書き</li><li>新しいトピックの概要把握</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 12: Manus ==================== -->
+<div class="slide" id="s12">
+  <div class="s-header">
+    <div class="s-htitle">Manus</div>
+    <div class="s-logo"><span class="s-logo-name">SHIFT AI</span><span class="s-logo-sub">Shift to AI era.</span></div>
+  </div>
+  <div class="s-body wide">
+    <div class="tool-wrap">
+      <div class="tool-left">
+        <div class="tool-icon" style="background:#FEE2E2;"><span class="material-icons" style="color:#EF4444;">smart_toy</span></div>
+        <div class="tool-name">Manus</div>
+        <div class="tool-maker">Monica AI</div>
+        <div class="tool-tagline">ブラウザを自律操作して<br>複雑な作業を代行する</div>
+        <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:5px;justify-content:center;">
+          <span class="pill pill-r">招待制（現在）</span>
+          <span class="pill pill-b">自律タスク</span>
+        </div>
+      </div>
+      <div class="info-grid">
+        <div class="info-card"><div class="info-label lbl-feat">特徴</div><ul><li>ブラウザ・ファイル操作を自律実行</li><li>複数ステップのタスクを一人でこなす</li><li>「やっておいて」が実現に最も近いAI</li></ul></div>
+        <div class="info-card"><div class="info-label lbl-str">強み</div><ul><li>人間がやるような操作を代行できる</li><li>リサーチ→整理→資料作成まで一貫</li><li>複雑な自動化タスクに強い</li></ul></div>
+        <div class="info-card"><div class="info-label lbl-wk">弱み</div><ul><li>動作が遅い・不安定なことがある</li><li>まだ発展途上（エラーも多め）</li><li>現在は利用制限あり</li></ul></div>
+        <div class="info-card"><div class="info-label lbl-use">使う場面</div><ul><li>複数サイトの情報収集・比較</li><li>繰り返し作業の自動化</li><li>「手順が多すぎる」タスクの代行</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 13: Felo ==================== -->
+<div class="slide" id="s13">
+  <div class="s-header">
+    <div class="s-htitle">Felo</div>
+    <div class="s-logo"><span class="s-logo-name">SHIFT AI</span><span class="s-logo-sub">Shift to AI era.</span></div>
+  </div>
+  <div class="s-body wide">
+    <div class="tool-wrap">
+      <div class="tool-left">
+        <div class="tool-icon" style="background:#E0F2FE;"><span class="material-icons" style="color:#0EA5E9;">search</span></div>
+        <div class="tool-name">Felo</div>
+        <div class="tool-maker">Felo AI</div>
+        <div class="tool-tagline">日本語に強い<br>AIリサーチエンジン</div>
+        <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:5px;justify-content:center;">
+          <span class="pill pill-g">無料プランあり</span>
+          <span class="pill pill-b">日本語特化</span>
+        </div>
+      </div>
+      <div class="info-grid">
+        <div class="info-card"><div class="info-label lbl-feat">特徴</div><ul><li>日本語の情報収集・整理に特化</li><li>出典付きで情報を提示してくれる</li><li>AIによる要約でノイズを除去</li></ul></div>
+        <div class="info-card"><div class="info-label lbl-str">強み</div><ul><li>日本語ソースへの対応が良好</li><li>調査結果が見やすく整理される</li><li>根拠のある情報を素早く集められる</li></ul></div>
+        <div class="info-card"><div class="info-label lbl-wk">弱み</div><ul><li>深い専門分野の分析は弱め</li><li>Gensparkほど資料化は得意でない</li><li>英語圏情報の網羅性は限定的</li></ul></div>
+        <div class="info-card"><div class="info-label lbl-use">使う場面</div><ul><li>日本語での業界・トレンド調査</li><li>ニュース・記事の横断的まとめ</li><li>「だいたい何が言われているか」把握</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 14: エージェント比較表 ==================== -->
+<div class="slide" id="s14">
+  <div class="s-header">
+    <div class="s-htitle">エージェントAI 3選 比較表</div>
+    <div class="s-logo"><span class="s-logo-name">SHIFT AI</span><span class="s-logo-sub">Shift to AI era.</span></div>
+  </div>
+  <div class="s-body wide">
+    <h2 style="margin-bottom:18px;">エージェントAI 3選 <span class="hlp">比較表</span></h2>
+    <div class="tbl-wrap" style="max-width:900px;">
+      <table>
+        <thead><tr><th>ツール</th><th>最大の強み</th><th>弱点</th><th>まずこれで試して</th></tr></thead>
+        <tbody>
+          <tr><td>Genspark</td><td>調査→美しい資料を自動生成</td><td>情報精度にムラあり</td><td>「○○業界の動向まとめて」と入力</td></tr>
+          <tr><td>Manus</td><td>複雑な操作タスクを自律実行</td><td>動作が遅い・まだ不安定</td><td>「△△を調べてリストにして」と依頼</td></tr>
+          <tr><td>Felo</td><td>日本語リサーチ・出典付き回答</td><td>深い分析は弱め</td><td>「最近の□□トレンドを調べて」</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="warn-block" style="margin-top:16px;max-width:720px;width:100%;">
+      <span class="material-icons" style="font-size:14px;vertical-align:middle;color:#EA580C;margin-right:5px;">tips_and_updates</span>
+      <strong>使い分けの目安：</strong> 日本語調査 → Felo ／ 資料化まで → Genspark ／ 操作代行 → Manus
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 15: AquaVoice ==================== -->
+<div class="slide" id="s15">
+  <div class="s-header">
+    <div class="s-htitle">AquaVoice</div>
+    <div class="s-logo"><span class="s-logo-name">SHIFT AI</span><span class="s-logo-sub">Shift to AI era.</span></div>
+  </div>
+  <div class="s-body wide">
+    <div class="tool-wrap">
+      <div class="tool-left">
+        <div class="tool-icon" style="background:#FDF2F8;"><span class="material-icons" style="color:#EC4899;">mic</span></div>
+        <div class="tool-name">AquaVoice</div>
+        <div class="tool-maker">音声入力AI</div>
+        <div class="tool-tagline">話すだけで<br>整った文章になる</div>
+        <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:5px;justify-content:center;">
+          <span class="pill pill-b">Mac対応</span>
+          <span class="pill pill-r">有料</span>
+        </div>
+      </div>
+      <div class="info-grid">
+        <div class="info-card"><div class="info-label lbl-feat">特徴</div><ul><li>話した言葉をAIが自動で整えてテキスト化</li><li>「えー」「あー」などを除去して出力</li><li>Mac全体で使えるシステムレベルの音声入力</li></ul></div>
+        <div class="info-card"><div class="info-label lbl-str">強み</div><ul><li>タイピングより圧倒的に速く入力できる</li><li>思考をそのまま文章化できる</li><li>どのアプリでも使えるのが強み</li></ul></div>
+        <div class="info-card"><div class="info-label lbl-wk">弱み</div><ul><li>静かな環境でないと精度が下がる</li><li>専門用語・固有名詞は誤認識しやすい</li><li>Mac専用（Windows非対応）</li></ul></div>
+        <div class="info-card"><div class="info-label lbl-use">使う場面</div><ul><li>アイデアをメモするとき</li><li>移動中・手が塞がっているときの入力</li><li>長い文章を素早く下書きしたいとき</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 16: tl;dv ==================== -->
+<div class="slide" id="s16">
+  <div class="s-header">
+    <div class="s-htitle">tl;dv</div>
+    <div class="s-logo"><span class="s-logo-name">SHIFT AI</span><span class="s-logo-sub">Shift to AI era.</span></div>
+  </div>
+  <div class="s-body wide">
+    <div class="tool-wrap">
+      <div class="tool-left">
+        <div class="tool-icon" style="background:#FFFBEB;"><span class="material-icons" style="color:#F59E0B;">videocam</span></div>
+        <div class="tool-name">tl;dv</div>
+        <div class="tool-maker">会議録画・要約AI</div>
+        <div class="tool-tagline">会議を録画して<br>AIが自動で要約する</div>
+        <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:5px;justify-content:center;">
+          <span class="pill pill-g">無料プランあり</span>
+          <span class="pill pill-b">Zoom/Meet対応</span>
+        </div>
+      </div>
+      <div class="info-grid">
+        <div class="info-card"><div class="info-label lbl-feat">特徴</div><ul><li>ZoomやGoogle Meetを録画・文字起こし</li><li>AIが会議内容を自動で要約</li><li>発言者ごとに内容を整理してくれる</li></ul></div>
+        <div class="info-card"><div class="info-label lbl-str">強み</div><ul><li>会議後の議事録作成が不要になる</li><li>参加できなかった人への共有が簡単</li><li>タイムスタンプ付きで振り返りやすい</li></ul></div>
+        <div class="info-card"><div class="info-label lbl-wk">弱み</div><ul><li>日本語の認識精度がやや不安定</li><li>雑音が多い環境では誤認識増える</li><li>高機能版は有料</li></ul></div>
+        <div class="info-card"><div class="info-label lbl-use">使う場面</div><ul><li>社内・顧客との打ち合わせ後の議事録</li><li>後から内容を確認・検索したいとき</li><li>欠席者への会議共有</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 17: Claude Code ==================== -->
+<div class="slide" id="s17">
+  <div class="s-header">
+    <div class="s-htitle">Claude Code</div>
+    <div class="s-logo"><span class="s-logo-name">SHIFT AI</span><span class="s-logo-sub">Shift to AI era.</span></div>
+  </div>
+  <div class="s-body wide">
+    <div class="tool-wrap">
+      <div class="tool-left">
+        <div class="tool-icon" style="background:#EEF2FF;"><span class="material-icons" style="color:#7C3AED;">code</span></div>
+        <div class="tool-name">Claude Code</div>
+        <div class="tool-maker">Anthropic</div>
+        <div class="tool-tagline">AIとペアで<br>コードを書く・直す</div>
+        <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:5px;justify-content:center;">
+          <span class="pill pill-r">有料（API利用）</span>
+          <span class="pill pill-p">CLIツール</span>
+        </div>
+      </div>
+      <div class="info-grid">
+        <div class="info-card"><div class="info-label lbl-feat">特徴</div><ul><li>ターミナル上でClaudeとコードを共同編集</li><li>ファイルの読み書き・実行まで自律的に行う</li><li>このスライドもClaude Codeで作成しました</li></ul></div>
+        <div class="info-card"><div class="info-label lbl-str">強み</div><ul><li>「こういうものを作って」で実際に動くものができる</li><li>エラーも自分で調べて直してくれる</li><li>非エンジニアでもアプリ・ツールが作れる</li></ul></div>
+        <div class="info-card"><div class="info-label lbl-wk">弱み</div><ul><li>ターミナル操作の最低限の知識が必要</li><li>API料金がかかる</li><li>大規模システムには別途設計が必要</li></ul></div>
+        <div class="info-card"><div class="info-label lbl-use">使う場面</div><ul><li>このスライドのようなHTMLツールの作成</li><li>データ整理・自動化スクリプトの作成</li><li>既存コードのバグ修正・改善</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 18: 専門ツールまとめ ==================== -->
+<div class="slide" id="s18">
+  <div class="s-header">
+    <div class="s-htitle">専門ツール 3つのまとめ</div>
+    <div class="s-logo"><span class="s-logo-name">SHIFT AI</span><span class="s-logo-sub">Shift to AI era.</span></div>
+  </div>
+  <div class="s-body">
+    <h2 style="margin-bottom:20px;">専門ツール <span class="hl">3つのまとめ</span></h2>
+    <div class="g3" style="width:100%;max-width:860px;">
+      <div class="card" style="text-align:left;">
+        <div style="display:flex;align-items:center;gap:9px;margin-bottom:12px;"><span class="material-icons" style="color:#EC4899;">mic</span><span style="font-weight:700;">AquaVoice</span></div>
+        <div style="font-size:.8rem;color:var(--text-m);line-height:1.6;margin-bottom:10px;">話すだけで整った文章に変換。タイピングより速く思考を文章化。</div>
+        <div style="font-size:.78rem;"><span style="color:#059669;font-weight:600;">向いてる人：</span><span style="color:var(--text-m);">Macユーザー・文章をたくさん書く人</span></div>
+      </div>
+      <div class="card" style="text-align:left;">
+        <div style="display:flex;align-items:center;gap:9px;margin-bottom:12px;"><span class="material-icons" style="color:#F59E0B;">videocam</span><span style="font-weight:700;">tl;dv</span></div>
+        <div style="font-size:.8rem;color:var(--text-m);line-height:1.6;margin-bottom:10px;">会議を録画→AIが自動で要約・文字起こし。議事録作成の手間がゼロに。</div>
+        <div style="font-size:.78rem;"><span style="color:#059669;font-weight:600;">向いてる人：</span><span style="color:var(--text-m);">会議が多い人・議事録担当者</span></div>
+      </div>
+      <div class="card" style="text-align:left;">
+        <div style="display:flex;align-items:center;gap:9px;margin-bottom:12px;"><span class="material-icons" style="color:#7C3AED;">code</span><span style="font-weight:700;">Claude Code</span></div>
+        <div style="font-size:.8rem;color:var(--text-m);line-height:1.6;margin-bottom:10px;">AIとペアでコードを書く。エンジニアでなくてもツール・自動化が実現。</div>
+        <div style="font-size:.78rem;"><span style="color:#059669;font-weight:600;">向いてる人：</span><span style="color:var(--text-m);">業務自動化・ツール作りに興味がある人</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 19: シーン別早見表 ==================== -->
+<div class="slide" id="s19">
+  <div class="s-header">
+    <div class="s-htitle">シーン別 おすすめツール早見表</div>
+    <div class="s-logo"><span class="s-logo-name">SHIFT AI</span><span class="s-logo-sub">Shift to AI era.</span></div>
+  </div>
+  <div class="s-body wide">
+    <h2 style="margin-bottom:18px;">シーン別 <span class="hl">おすすめツール早見表</span></h2>
+    <div class="tbl-wrap" style="max-width:800px;">
+      <table>
+        <thead><tr><th>やりたいこと</th><th>まず使うツール</th><th>ポイント</th></tr></thead>
+        <tbody>
+          <tr><td class="tc-l">文章を書く・直したい</td><td>Claude</td><td class="tc-l">品質・自然さが高い</td></tr>
+          <tr><td class="tc-l">アイデア出し・壁打ち</td><td>ChatGPT</td><td class="tc-l">幅広く発散できる</td></tr>
+          <tr><td class="tc-l">調査してまとめてほしい</td><td>Felo / Genspark</td><td class="tc-l">日本語調査はFelo、資料化はGenspark</td></tr>
+          <tr><td class="tc-l">複雑な作業を任せたい</td><td>Manus</td><td class="tc-l">多ステップの自律実行</td></tr>
+          <tr><td class="tc-l">会議を記録・要約したい</td><td>tl;dv</td><td class="tc-l">Zoom/Meet自動録画</td></tr>
+          <tr><td class="tc-l">話しながら文字にしたい</td><td>AquaVoice</td><td class="tc-l">Mac全体で音声入力</td></tr>
+          <tr><td class="tc-l">コードを書く・直したい</td><td>Claude Code</td><td class="tc-l">非エンジニアでも使える</td></tr>
+          <tr><td class="tc-l">Google連携で使いたい</td><td>Gemini</td><td class="tc-l">Gmail・ドライブと連動</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 20: HOW 場面① ==================== -->
+<div class="slide" id="s20">
+  <div class="s-header">
+    <div class="s-htitle">場面① 文章を書く・直したい</div>
+    <div class="s-logo"><span class="s-logo-name">SHIFT AI</span><span class="s-logo-sub">Shift to AI era.</span></div>
+  </div>
+  <div class="s-body">
+    <h2 style="margin-bottom:18px;">文章を書く・直したい → <span class="hl">Claude</span></h2>
+    <div class="card" style="max-width:780px;width:100%;text-align:left;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--bd);">
+        <div class="tool-icon" style="width:40px;height:40px;background:#FEF3E8;"><span class="material-icons" style="color:#D29D6B;font-size:20px;">psychology</span></div>
+        <div><div style="font-weight:700;">Claude がおすすめ</div><div style="font-size:.73rem;color:var(--text-m);">長文・品質重視ならダントツ</div></div>
+      </div>
+      <div class="g2">
+        <div style="background:#F9FAFB;border-radius:var(--rs);padding:14px;">
+          <div style="font-size:.73rem;font-weight:700;color:#059669;margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase;">活用例</div>
+          <ul style="list-style:none;padding:0;">
+            <li style="font-size:.8rem;padding:4px 0;border-bottom:1px solid rgba(0,0,0,.05);">提案書・報告書の下書き</li>
+            <li style="font-size:.8rem;padding:4px 0;border-bottom:1px solid rgba(0,0,0,.05);">メール文の改善・トーン調整</li>
+            <li style="font-size:.8rem;padding:4px 0;border-bottom:1px solid rgba(0,0,0,.05);">SNS投稿・ブログ記事の生成</li>
+            <li style="font-size:.8rem;padding:4px 0;">長い資料を貼り付けて要約</li>
+          </ul>
+        </div>
+        <div style="background:#F9FAFB;border-radius:var(--rs);padding:14px;">
+          <div style="font-size:.73rem;font-weight:700;color:var(--pur);margin-bottom:8px;letter-spacing:.5px;text-transform:uppercase;">プロンプト例</div>
+          <div style="font-size:.78rem;line-height:1.7;color:var(--text);background:#fff;border:1px solid var(--bd);border-radius:6px;padding:10px;font-family:monospace;">「以下の文章を、上司に送るビジネスメールとして丁寧に書き直してください。<br>[元の文章を貼る]」</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 21: HOW 場面② ==================== -->
+<div class="slide" id="s21">
+  <div class="s-header">
+    <div class="s-htitle">場面② 調査してまとめてほしい</div>
+    <div class="s-logo"><span class="s-logo-name">SHIFT AI</span><span class="s-logo-sub">Shift to AI era.</span></div>
+  </div>
+  <div class="s-body">
+    <h2 style="margin-bottom:18px;">調査してまとめてほしい → <span class="hl">Felo / Genspark</span></h2>
+    <div class="scene-wrap">
+      <div class="scene-card">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:11px;"><span class="material-icons" style="color:#0EA5E9;font-size:18px;">search</span><span style="font-weight:700;">Felo</span><span style="font-size:.72rem;color:var(--text-m);">日本語リサーチ</span></div>
+        <div style="font-size:.8rem;color:var(--text-m);line-height:1.6;margin-bottom:10px;">日本語の情報を出典付きで収集・整理。「最近のトレンドをざっくり教えて」に最適。</div>
+        <div style="background:#F9FAFB;border-radius:var(--rs);padding:10px;font-size:.76rem;font-family:monospace;color:var(--text);">「広島のカフェ市場の最新トレンドを調べてまとめてください」</div>
+      </div>
+      <div class="scene-card">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:11px;"><span class="material-icons" style="color:#F59E0B;font-size:18px;">rocket_launch</span><span style="font-weight:700;">Genspark</span><span style="font-size:.72rem;color:var(--text-m);">資料化まで一気通貫</span></div>
+        <div style="font-size:.8rem;color:var(--text-m);line-height:1.6;margin-bottom:10px;">調査結果をそのまま美しいSpark Pageに変換。「調べて資料にして」がこれ一本で完結。</div>
+        <div style="background:#F9FAFB;border-radius:var(--rs);padding:10px;font-size:.76rem;font-family:monospace;color:var(--text);">「競合他社5社の特徴を比較してSparkページにまとめて」</div>
+      </div>
+    </div>
+    <div style="margin-top:14px;font-size:.8rem;color:var(--text-m);">どちらも試して、精度・見やすさを比べてみよう</div>
+  </div>
+</div>
+
+<!-- ==================== 22: HOW 場面③ ==================== -->
+<div class="slide" id="s22">
+  <div class="s-header">
+    <div class="s-htitle">場面③ 会議を楽にしたい</div>
+    <div class="s-logo"><span class="s-logo-name">SHIFT AI</span><span class="s-logo-sub">Shift to AI era.</span></div>
+  </div>
+  <div class="s-body">
+    <h2 style="margin-bottom:18px;">会議を楽にしたい → <span class="hl">tl;dv / AquaVoice</span></h2>
+    <div class="scene-wrap">
+      <div class="scene-card">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:11px;"><span class="material-icons" style="color:#F59E0B;font-size:18px;">videocam</span><span style="font-weight:700;">tl;dv</span><span style="font-size:.72rem;color:var(--text-m);">会議録画・要約</span></div>
+        <ul style="list-style:none;padding:0;">
+          <li style="font-size:.82rem;padding:6px 0;border-bottom:1px solid rgba(0,0,0,.05);display:flex;gap:7px;align-items:center;"><span class="material-icons" style="font-size:14px;color:#059669;">check_circle</span>ZoomやMeetに自動参加して録画</li>
+          <li style="font-size:.82rem;padding:6px 0;border-bottom:1px solid rgba(0,0,0,.05);display:flex;gap:7px;align-items:center;"><span class="material-icons" style="font-size:14px;color:#059669;">check_circle</span>AIが議事録を自動生成</li>
+          <li style="font-size:.82rem;padding:6px 0;display:flex;gap:7px;align-items:center;"><span class="material-icons" style="font-size:14px;color:#059669;">check_circle</span>タイムスタンプ付きで後から検索可能</li>
+        </ul>
+      </div>
+      <div class="scene-card">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:11px;"><span class="material-icons" style="color:#EC4899;font-size:18px;">mic</span><span style="font-weight:700;">AquaVoice</span><span style="font-size:.72rem;color:var(--text-m);">音声入力</span></div>
+        <ul style="list-style:none;padding:0;">
+          <li style="font-size:.82rem;padding:6px 0;border-bottom:1px solid rgba(0,0,0,.05);display:flex;gap:7px;align-items:center;"><span class="material-icons" style="font-size:14px;color:#059669;">check_circle</span>会議中に話しながらメモを音声入力</li>
+          <li style="font-size:.82rem;padding:6px 0;border-bottom:1px solid rgba(0,0,0,.05);display:flex;gap:7px;align-items:center;"><span class="material-icons" style="font-size:14px;color:#059669;">check_circle</span>アイデアや気づきをその場でテキスト化</li>
+          <li style="font-size:.82rem;padding:6px 0;display:flex;gap:7px;align-items:center;"><span class="material-icons" style="font-size:14px;color:#059669;">check_circle</span>Mac全体どこでも使える</li>
+        </ul>
+      </div>
+    </div>
+    <div class="info-block" style="margin-top:14px;max-width:600px;width:100%;">
+      <span class="material-icons" style="font-size:13px;vertical-align:middle;color:#059669;margin-right:5px;">tips_and_updates</span>
+      <strong>組み合わせ技：</strong> tl;dvで会議録画 → 要約をClaudeに貼り付けてアクションリスト化
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 23: HOW 場面④ ==================== -->
+<div class="slide" id="s23">
+  <div class="s-header">
+    <div class="s-htitle">場面④ 複雑な作業を任せたい</div>
+    <div class="s-logo"><span class="s-logo-name">SHIFT AI</span><span class="s-logo-sub">Shift to AI era.</span></div>
+  </div>
+  <div class="s-body">
+    <h2 style="margin-bottom:18px;">複雑な作業を任せたい → <span class="hl">Manus</span></h2>
+    <div class="card" style="max-width:700px;width:100%;text-align:left;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:9px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--bd);">
+        <span class="material-icons" style="color:#EF4444;">smart_toy</span>
+        <span style="font-weight:700;">Manus がおすすめ：複数ステップの作業を自律実行</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:center;gap:9px;font-size:.82rem;padding:8px 12px;background:#F9FAFB;border-radius:var(--rs);"><span class="material-icons" style="color:#059669;font-size:15px;">check</span>「A社・B社・C社のサービス料金を比較してExcelにまとめて」</div>
+        <div style="display:flex;align-items:center;gap:9px;font-size:.82rem;padding:8px 12px;background:#F9FAFB;border-radius:var(--rs);"><span class="material-icons" style="color:#059669;font-size:15px;">check</span>「求人サイト3つから広島のデザイナー求人を集めてリスト化して」</div>
+        <div style="display:flex;align-items:center;gap:9px;font-size:.82rem;padding:8px 12px;background:#F9FAFB;border-radius:var(--rs);"><span class="material-icons" style="color:#059669;font-size:15px;">check</span>「このURLのニュースを毎日まとめてレポートにして」</div>
+      </div>
+    </div>
+    <div class="warn-block" style="max-width:580px;width:100%;font-size:.82rem;">
+      <span class="material-icons" style="font-size:13px;vertical-align:middle;color:#EA580C;margin-right:5px;">warning</span>
+      まだ発展途上。結果は必ず確認する前提で使おう
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 24: HOW 場面⑤ ==================== -->
+<div class="slide" id="s24">
+  <div class="s-header">
+    <div class="s-htitle">場面⑤ コードを書く・直したい</div>
+    <div class="s-logo"><span class="s-logo-name">SHIFT AI</span><span class="s-logo-sub">Shift to AI era.</span></div>
+  </div>
+  <div class="s-body">
+    <h2 style="margin-bottom:18px;">コードを書く・直したい → <span class="hl">Claude Code</span></h2>
+    <div class="g2" style="width:100%;max-width:780px;margin-bottom:14px;">
+      <div class="card" style="text-align:left;">
+        <div style="font-size:.72rem;font-weight:700;color:var(--pur);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">エンジニアの場合</div>
+        <ul style="list-style:none;padding:0;">
+          <li style="font-size:.8rem;padding:5px 0;border-bottom:1px solid rgba(0,0,0,.05);">コードベース全体を理解してくれる</li>
+          <li style="font-size:.8rem;padding:5px 0;border-bottom:1px solid rgba(0,0,0,.05);">バグ修正・リファクタリングを自律実行</li>
+          <li style="font-size:.8rem;padding:5px 0;">複数ファイルにまたがる変更も対応</li>
+        </ul>
+      </div>
+      <div class="card" style="text-align:left;">
+        <div style="font-size:.72rem;font-weight:700;color:#059669;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">非エンジニアの場合</div>
+        <ul style="list-style:none;padding:0;">
+          <li style="font-size:.8rem;padding:5px 0;border-bottom:1px solid rgba(0,0,0,.05);">「こういうツールを作って」で動くものができる</li>
+          <li style="font-size:.8rem;padding:5px 0;border-bottom:1px solid rgba(0,0,0,.05);">Excel処理・自動化スクリプトを生成</li>
+          <li style="font-size:.8rem;padding:5px 0;">このスライドもClaude Codeで作りました</li>
+        </ul>
+      </div>
+    </div>
+    <div class="accent-block" style="max-width:620px;width:100%;font-size:.82rem;">
+      <span class="material-icons" style="font-size:13px;vertical-align:middle;color:var(--pur);margin-right:5px;">lightbulb</span>
+      <strong>まずはChatGPTでも：</strong>「このエラーを直して」とコードを貼るだけでも意外と解決します
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 25: 組み合わせ ==================== -->
+<div class="slide" id="s25">
+  <div class="s-header">
+    <div class="s-htitle">ツールの組み合わせで最大化</div>
+    <div class="s-logo"><span class="s-logo-name">SHIFT AI</span><span class="s-logo-sub">Shift to AI era.</span></div>
+  </div>
+  <div class="s-body">
+    <h2 style="margin-bottom:8px;">ツールの<span class="hl">組み合わせ</span>で最大化</h2>
+    <p class="sub" style="margin-bottom:20px;">1つを使いこなすより、役割分担させるのが上手い使い方</p>
+    <div class="combo">
+      <div style="font-size:.72rem;color:var(--text-m);letter-spacing:1px;text-transform:uppercase;font-weight:700;margin-bottom:4px;">例：市場調査レポートを作る</div>
+      <div class="combo-row"><span class="material-icons">search</span><div class="cr-tool" style="color:#0EA5E9;">Felo</div><div class="cr-desc">日本語の業界トレンドを収集・整理</div></div>
+      <div style="text-align:center;color:var(--text-m);"><span class="material-icons" style="font-size:16px;">arrow_downward</span></div>
+      <div class="combo-row"><span class="material-icons">psychology</span><div class="cr-tool" style="color:#D29D6B;">Claude</div><div class="cr-desc">調査結果を貼り付けて報告書に文章化</div></div>
+      <div style="text-align:center;color:var(--text-m);"><span class="material-icons" style="font-size:16px;">arrow_downward</span></div>
+      <div class="combo-row"><span class="material-icons">videocam</span><div class="cr-tool" style="color:#F59E0B;">tl;dv</div><div class="cr-desc">報告内容をチームに共有する会議を録画・要約</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 26: 迷ったらChatGPT ==================== -->
+<div class="slide" id="s26">
+  <div class="s-header">
+    <div class="s-htitle">迷ったらまずChatGPT</div>
+    <div class="s-logo"><span class="s-logo-name">SHIFT AI</span><span class="s-logo-sub">Shift to AI era.</span></div>
+  </div>
+  <div class="s-body">
+    <span class="material-icons" style="font-size:3rem;color:#10A37F;margin-bottom:10px;">chat</span>
+    <h2 style="margin-bottom:10px;">迷ったら<span class="hl">まずChatGPT</span></h2>
+    <p class="sub" style="margin-bottom:20px;">「どのAIを使えばいいか分からない」ときの最初の入口はChatGPTで十分です</p>
+    <div class="card" style="max-width:620px;width:100%;text-align:left;margin-bottom:16px;">
+      <div style="font-size:.72rem;color:var(--text-m);margin-bottom:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;">ChatGPTへの「AIツール選び」相談例</div>
+      <div style="background:#F9FAFB;border:1px solid var(--bd);border-radius:var(--rs);padding:12px;font-size:.8rem;font-family:monospace;line-height:1.7;color:var(--text);">「私は営業担当です。毎週の会議議事録作成と、顧客への提案書作成に時間がかかっています。どのAIツールを使えば効率化できますか？」</div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;align-items:center;">
+      <div class="card" style="padding:10px 16px;text-align:center;">
+        <div style="color:#059669;font-weight:700;font-size:.75rem;margin-bottom:3px;">Step 1</div>
+        <div style="font-size:.8rem;color:var(--text-m);">ChatGPTで相談</div>
+      </div>
+      <span class="material-icons" style="color:var(--text-m);">arrow_forward</span>
+      <div class="card" style="padding:10px 16px;text-align:center;">
+        <div style="color:#059669;font-weight:700;font-size:.75rem;margin-bottom:3px;">Step 2</div>
+        <div style="font-size:.8rem;color:var(--text-m);">おすすめを試す</div>
+      </div>
+      <span class="material-icons" style="color:var(--text-m);">arrow_forward</span>
+      <div class="card" style="padding:10px 16px;text-align:center;">
+        <div style="color:#059669;font-weight:700;font-size:.75rem;margin-bottom:3px;">Step 3</div>
+        <div style="font-size:.8rem;color:var(--text-m);">使い分けが身につく</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 27: ハンズオン説明 ==================== -->
+<div class="slide" id="s27">
+  <div class="s-header">
+    <div class="s-htitle">ハンズオンタイム</div>
+    <div class="s-logo"><span class="s-logo-name">SHIFT AI</span><span class="s-logo-sub">Shift to AI era.</span></div>
+  </div>
+  <div class="s-body">
+    <span class="material-icons" style="font-size:3rem;color:var(--pink);margin-bottom:10px;">laptop</span>
+    <h2 style="margin-bottom:8px;">ハンズオンタイム</h2>
+    <p class="sub" style="margin-bottom:20px;">実際に触って、違いを体感してみよう</p>
+    <div class="hs-box">
+      <div style="font-size:.72rem;color:var(--pink);font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">今日のお題</div>
+      <div style="font-size:1.05rem;font-weight:700;color:var(--text);line-height:1.5;margin-bottom:18px;">「自己紹介文を各AIに書かせて比べてみよう」</div>
+      <div style="font-size:.78rem;color:var(--text-m);line-height:1.7;background:#F9FAFB;border-radius:var(--rs);padding:12px 16px;text-align:left;border:1px solid var(--bd);">
+        <strong style="color:var(--text);">プロンプト例：</strong><br>「私は広島在住の[職業]です。SNSのプロフィール用に、親しみやすくて印象に残る自己紹介文を100字で書いてください。」
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:14px;">
+      <span class="pill pill-g" style="padding:5px 14px;">ChatGPT</span>
+      <span class="pill pill-b" style="padding:5px 14px;">Gemini</span>
+      <span class="pill pill-p" style="padding:5px 14px;">Claude</span>
+      <span class="pill" style="padding:5px 14px;background:#E0F2FE;color:#0369A1;border:1px solid #BAE6FD;">+ Feloも試してみても</span>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 28: やってみよう ==================== -->
+<div class="slide" id="s28">
+  <div class="s-header">
+    <div class="s-htitle">やってみよう！</div>
+    <div class="s-logo"><span class="s-logo-name">SHIFT AI</span><span class="s-logo-sub">Shift to AI era.</span></div>
+  </div>
+  <div class="s-body">
+    <h2 style="margin-bottom:6px;"><span class="hlp">やってみよう！</span></h2>
+    <p class="sub" style="margin-bottom:18px;">時間：約20分 ・ 困ったら気軽に声をかけてください</p>
+    <div style="width:100%;max-width:600px;">
+      <div class="step-box"><div class="step-num">1</div><div><div style="font-weight:700;margin-bottom:4px;font-size:.88rem;">同じプロンプトを3つのAIに入力する</div><div style="font-size:.77rem;color:var(--text-m);">ChatGPT / Gemini / Claude のどれか使えるものへ</div></div></div>
+      <div class="step-box"><div class="step-num">2</div><div><div style="font-weight:700;margin-bottom:4px;font-size:.88rem;">3つの回答を見比べる</div><div style="font-size:.77rem;color:var(--text-m);">文章の長さ・トーン・内容の違いに注目</div></div></div>
+      <div class="step-box"><div class="step-num">3</div><div><div style="font-weight:700;margin-bottom:4px;font-size:.88rem;">一番気に入った回答を改善してみる</div><div style="font-size:.77rem;color:var(--text-m);">「もっとカジュアルに」「絵文字を入れて」と追加指示を試す</div></div></div>
+      <div class="step-box" style="border-color:rgba(236,72,153,.3);"><div class="step-num" style="background:var(--grad-diag);">+</div><div><div style="font-weight:700;margin-bottom:4px;font-size:.88rem;color:var(--pink);">余裕があれば：エージェントAIも試す</div><div style="font-size:.77rem;color:var(--text-m);">Feloに「自分の業界のトレンドを調べて」と入力</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 29: シェアタイム ==================== -->
+<div class="slide" id="s29">
+  <div class="s-header">
+    <div class="s-htitle">気づいたことをシェアしよう</div>
+    <div class="s-logo"><span class="s-logo-name">SHIFT AI</span><span class="s-logo-sub">Shift to AI era.</span></div>
+  </div>
+  <div class="s-body">
+    <span class="material-icons" style="font-size:2.8rem;color:var(--pink);margin-bottom:10px;">groups</span>
+    <h2 style="margin-bottom:18px;">気づいたこと・<span class="hlp">シェアしよう</span></h2>
+    <div class="g3" style="width:100%;max-width:780px;">
+      <div class="card" style="text-align:left;">
+        <span class="material-icons" style="color:#F59E0B;margin-bottom:10px;font-size:1.5rem;">sentiment_very_satisfied</span>
+        <div style="font-weight:700;margin-bottom:8px;font-size:.88rem;">一番気に入ったAIは？</div>
+        <div style="font-size:.77rem;color:var(--text-m);line-height:1.6;">どのAIの回答が好みでしたか？それはなぜ？</div>
+      </div>
+      <div class="card" style="text-align:left;">
+        <span class="material-icons" style="color:var(--pur);margin-bottom:10px;font-size:1.5rem;">compare_arrows</span>
+        <div style="font-weight:700;margin-bottom:8px;font-size:.88rem;">違いで気づいたこと</div>
+        <div style="font-size:.77rem;color:var(--text-m);line-height:1.6;">ChatGPT・Gemini・Claudeで何が違いましたか？</div>
+      </div>
+      <div class="card" style="text-align:left;">
+        <span class="material-icons" style="color:#059669;margin-bottom:10px;font-size:1.5rem;">work</span>
+        <div style="font-weight:700;margin-bottom:8px;font-size:.88rem;">仕事で使えそう？</div>
+        <div style="font-size:.77rem;color:var(--text-m);line-height:1.6;">自分の仕事のどの場面で使えそうですか？</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 30: 次の一歩 ==================== -->
+<div class="slide" id="s30">
+  <div class="s-header">
+    <div class="s-htitle">今週試してほしい3つのこと</div>
+    <div class="s-logo"><span class="s-logo-name">SHIFT AI</span><span class="s-logo-sub">Shift to AI era.</span></div>
+  </div>
+  <div class="s-body">
+    <h2 style="margin-bottom:8px;">今週試してほしい<span class="hlp">3つのこと</span></h2>
+    <p class="sub" style="margin-bottom:18px;">「いつか使おう」はほぼ使わない。今週中にやってみよう。</p>
+    <div style="width:100%;max-width:620px;">
+      <div style="display:flex;align-items:flex-start;gap:14px;background:#fff;border:1px solid rgba(236,72,153,.2);border-radius:var(--r);padding:16px 20px;margin-bottom:10px;box-shadow:var(--shadow);">
+        <div style="font-size:1.8rem;font-weight:900;background:var(--grad-diag);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;min-width:36px;">01</div>
+        <div><div style="font-weight:700;margin-bottom:4px;font-size:.88rem;">ChatGPTに仕事の悩みを相談する</div><div style="font-size:.78rem;color:var(--text-m);">「今週一番時間がかかったこと」をそのまま話しかけてみる</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:14px;background:#fff;border:1px solid rgba(236,72,153,.2);border-radius:var(--r);padding:16px 20px;margin-bottom:10px;box-shadow:var(--shadow);">
+        <div style="font-size:1.8rem;font-weight:900;background:var(--grad-diag);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;min-width:36px;">02</div>
+        <div><div style="font-weight:700;margin-bottom:4px;font-size:.88rem;">長い資料をClaudeに要約させる</div><div style="font-size:.78rem;color:var(--text-m);">PDFや長いメールを貼り付けて「3行で要約して」と指示</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:14px;background:#fff;border:1px solid rgba(236,72,153,.2);border-radius:var(--r);padding:16px 20px;box-shadow:var(--shadow);">
+        <div style="font-size:1.8rem;font-weight:900;background:var(--grad-diag);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;min-width:36px;">03</div>
+        <div><div style="font-weight:700;margin-bottom:4px;font-size:.88rem;">Feloで自分の業界を調べてみる</div><div style="font-size:.78rem;color:var(--text-m);">「[自分の業界] 最新トレンド」と入力して情報収集を体験</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 31: CLOSING ==================== -->
+<div class="slide closing-slide" id="s31">
+  <div class="s-header">
+    <div class="s-htitle">まとめ</div>
+    <div class="s-logo"><span class="s-logo-name">SHIFT AI</span><span class="s-logo-sub">Shift to AI era.</span></div>
+  </div>
+  <div class="s-body">
+    <h2 style="margin-bottom:20px;">AIは<span class="grd">「全部使い」</span>が正解</h2>
+    <ul class="chk" style="margin-bottom:22px;">
+      <li><span class="material-icons">check_circle</span>LLM（ChatGPT / Gemini / Claude）は目的に応じて使い分ける</li>
+      <li><span class="material-icons">check_circle</span>エージェントAIは「調べて・まとめて・やっておいて」が得意</li>
+      <li><span class="material-icons">check_circle</span>専門ツールで会議・音声・コードを効率化</li>
+      <li><span class="material-icons">check_circle</span>迷ったらまずChatGPTに相談するところから始める</li>
+    </ul>
+    <div style="background:#fff;border:1px solid var(--bd);border-radius:var(--r);padding:16px 24px;max-width:520px;width:100%;box-shadow:var(--shadow);text-align:center;">
+      <div style="font-size:.72rem;color:var(--text-m);margin-bottom:6px;font-weight:600;letter-spacing:.5px;">SHIFT AI コミュニティ</div>
+      <div style="font-size:.95rem;font-weight:700;color:var(--text);">引き続き一緒に学んでいきましょう！</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /deck -->
+
+<button class="nav nav-l" onclick="go(-1)"><span class="material-icons">chevron_left</span></button>
+<button class="nav nav-r" onclick="go(1)"><span class="material-icons">chevron_right</span></button>
+<button class="fsbtn" onclick="toggleFS()"><span class="material-icons" id="fsi">fullscreen</span></button>
+<div class="progress" id="pb"></div>
+<div class="counter" id="ct">1 / 31</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+let cur = 0;
+function goTo(n) {
+  slides[cur].classList.remove('on');
+  cur = Math.max(0, Math.min(total-1, n));
+  slides[cur].classList.add('on');
+  document.getElementById('ct').textContent = (cur+1) + ' / ' + total;
+  document.getElementById('pb').style.width = ((cur+1)/total*100) + '%';
+}
+function go(d) { goTo(cur+d); }
+document.addEventListener('keydown', e => {
+  if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' '){e.preventDefault();go(1);}
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();go(-1);}
+  if(e.key==='f'||e.key==='F') toggleFS();
+});
+let tx=0;
+document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;},{passive:true});
+document.addEventListener('touchend',e=>{const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>50)go(d<0?1:-1);},{passive:true});
+function toggleFS(){
+  if(!document.fullscreenElement){document.documentElement.requestFullscreen();document.getElementById('fsi').textContent='fullscreen_exit';}
+  else{document.exitFullscreen();document.getElementById('fsi').textContent='fullscreen';}
+}
+goTo(0);
+</script>
+</body>
+</html>
